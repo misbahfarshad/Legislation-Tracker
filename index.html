@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Illinois Clean Energy Legislation Tracker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="3" fill="rgba(255,255,255,0.05)"/><circle cx="40" cy="80" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .controls {
+            padding: 30px 40px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .search-filter-container {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px 12px 45px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .filter-select {
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            padding: 20px 40px;
+            background: #fff;
+            border-bottom: 1px solid #e9ecef;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 150px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .legislation-grid {
+            padding: 30px 40px;
+            display: grid;
+            gap: 25px;
+        }
+
+        .bill-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #3498db;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bill-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(52, 152, 219, 0.02) 100%);
+            pointer-events: none;
+        }
+
+        .bill-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .bill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .bill-number {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-active { background: #d4edda; color: #155724; }
+        .status-passed { background: #cce5ff; color: #004085; }
+        .status-failed { background: #f8d7da; color: #721c24; }
+        .status-pending { background: #fff3cd; color: #856404; }
+
+        .action-required {
+            border-left: 5px solid #dc3545 !important;
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.02) 0%, rgba(220, 53, 69, 0.05) 100%);
+        }
+
+        .upcoming-deadline {
+            border-left: 5px solid #fd7e14 !important;
+            background: linear-gradient(135deg, rgba(253, 126, 20, 0.02) 0%, rgba(253, 126, 20, 0.05) 100%);
+        }
+
+        .analysis-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+
+        .analysis-complete { background: #d1ecf1; color: #0c5460; }
+        .analysis-pending { background: #f8d7da; color: #721c24; }
+        .analysis-progress { background: #fff3cd; color: #856404; }
+
+        .deadline-alert {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #856404;
+            font-weight: 500;
+        }
+
+        .urgent-deadline {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .bill-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .bill-description {
+            color: #6c757d;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .bill-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #6c757d;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .sponsor {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        .error {
+            text-align: center;
+            padding: 60px;
+            color: #dc3545;
+            font-size: 1.1rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px;
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        .csv-info {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 40px;
+        }
+
+        .csv-info h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .csv-info p {
+            color: #424242;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .header p { font-size: 1rem; }
+            .controls { padding: 20px; }
+            .legislation-grid { padding: 20px; }
+            .bill-card { padding: 20px; }
+            .search-filter-container { flex-direction: column; }
+            .search-box { min-width: 100%; }
+            .stats { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏛️ Illinois Clean Energy Legislation Tracker</h1>
+            <p>Strategic monitoring of clean energy policy developments in the Illinois General Assembly</p>
+        </div>
+
+        <div class="csv-info">
+            <h3>📊 Legislative Tracking Platform</h3>
+            <p><strong>Data source:</strong> legislation-data.csv | <strong>Last updated:</strong> <span id="lastUpdated">Auto-detected</span></p>
+            <p>This platform enables strategic monitoring of legislation, stakeholder analysis, and policy development tracking through a maintainable CSV data structure.</p>
+            <p><strong>CSV Format:</strong> BillNumber, Title, Description, Status, Sponsor, IntroducedDate, LastAction, Chamber, Category, StakeholderNotes, PriorityLevel, ImpactAssessment, FiscalNote, AnalysisComplete, SMEContact, CoalitionPartners, DeadlineDate, RequiresAction</p>
+        </div>
+
+        <div class="controls">
+            <div class="search-filter-container">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search bills by number, title, or sponsor...">
+                </div>
+                <div class="filter-group">
+                    <select id="statusFilter" class="filter-select">
+                        <option value="">All Statuses</option>
+                        <option value="Active">Active</option>
+                        <option value="Passed">Passed</option>
+                        <option value="Failed">Failed</option>
+                        <option value="Pending">Pending</option>
+                    </select>
+                    <select id="chamberFilter" class="filter-select">
+                        <option value="">All Chambers</option>
+                        <option value="House">House</option>
+                        <option value="Senate">Senate</option>
+                    </select>
+                    <select id="categoryFilter" class="filter-select">
+                        <option value="">All Categories</option>
+                        <option value="Solar">Solar</option>
+                        <option value="Wind">Wind</option>
+                        <option value="Storage">Storage</option>
+                        <option value="Grid">Grid</option>
+                        <option value="Efficiency">Efficiency</option>
+                        <option value="Carbon">Carbon</option>
+                        <option value="Workforce">Workforce</option>
+                        <option value="Appropriations">Appropriations</option>
+                    </select>
+                    <select id="priorityFilter" class="filter-select">
+                        <option value="">All Priorities</option>
+                        <option value="High">High Priority</option>
+                        <option value="Medium">Medium Priority</option>
+                        <option value="Low">Low Priority</option>
+                        <option value="Monitor">Monitor Only</option>
+                    </select>
+                    <select id="analysisFilter" class="filter-select">
+                        <option value="">Analysis Status</option>
+                        <option value="Complete">Analysis Complete</option>
+                        <option value="Pending">Analysis Pending</option>
+                        <option value="In Progress">In Progress</option>
+                    </select>
+                    <select id="actionFilter" class="filter-select">
+                        <option value="">All Bills</option>
+                        <option value="true">Requires Action</option>
+                        <option value="upcoming">Upcoming Deadlines</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalBills">-</div>
+                <div class="stat-label">Total Bills</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="activeBills">-</div>
+                <div class="stat-label">Active</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="passedBills">-</div>
+                <div class="stat-label">Passed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="recentBills">-</div>
+                <div class="stat-label">This Month</div>
+            </div>
+        </div>
+
+        <div class="legislation-grid" id="legislationGrid">
+            <div class="loading">Loading legislation data...</div>
+        </div>
+    </div>
+
+    <script>
+        let allLegislation = [];
+        let filteredLegislation = [];
+
+        // Load and parse CSV data
+        async function loadLegislationData() {
+            try {
+                // Try to load from CSV file
+                const response = await fetch('legislation-data.csv');
+                if (!response.ok) {
+                    throw new Error('CSV file not found');
+                }
+                const csvText = await response.text();
+                
+                Papa.parse(csvText, {
+                    header: true,
+                    skipEmptyLines: true,
+                    dynamicTyping: true,
+                    complete: function(results) {
+                        if (results.errors.length > 0) {
+                            console.error('CSV parsing errors:', results.errors);
+                        }
+                        allLegislation = results.data.filter(row => row.BillNumber); // Remove empty rows
+                        filteredLegislation = [...allLegislation];
+                        displayLegislation();
+                        updateStats();
+                    },
+                    error: function(error) {
+                        showError('Error parsing CSV: ' + error.message);
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading CSV:', error);
+                loadSampleData();
+            }
+        }
+
+        // Fallback sample data if CSV is not available
+        function loadSampleData() {
+            allLegislation = [
+                {
+                    BillNumber: "HB 2966",
+                    Title: "Clean Energy Jobs Act Extension",
+                    Description: "Extends the Clean Energy Jobs Act provisions and expands renewable energy workforce development programs statewide.",
+                    Status: "Active",
+                    Sponsor: "Rep. Ann Williams",
+                    IntroducedDate: "2024-02-15",
+                    LastAction: "Referred to Energy Committee",
+                    Chamber: "House",
+                    Category: "Workforce",
+                    StakeholderNotes: "Key sponsor on energy workforce issues - strong relationship with labor unions",
+                    PriorityLevel: "High"
+                },
+                {
+                    BillNumber: "SB 1820",
+                    Title: "Grid Modernization and Storage",
+                    Description: "Authorizes utility-scale battery storage projects and establishes grid modernization standards for renewable integration.",
+                    Status: "Passed",
+                    Sponsor: "Sen. Michael Hastings",
+                    IntroducedDate: "2024-01-20",
+                    LastAction: "Signed by Governor",
+                    Chamber: "Senate",
+                    Category: "Storage",
+                    StakeholderNotes: "Strong bipartisan support - good model for future storage legislation",
+                    PriorityLevel: "Medium"
+                },
+                {
+                    BillNumber: "HB 3142",
+                    Title: "Community Solar Expansion",
+                    Description: "Removes capacity caps on community solar programs and streamlines interconnection procedures for small-scale projects.",
+                    Status: "Pending",
+                    Sponsor: "Rep. Jennifer Gong-Gershowitz",
+                    IntroducedDate: "2024-03-01",
+                    LastAction: "Committee hearing scheduled",
+                    Chamber: "House",
+                    Category: "Solar",
+                    StakeholderNotes: "Environmental justice focus - coordinate with equity initiatives",
+                    PriorityLevel: "High"
+                },
+                {
+                    BillNumber: "SB 2055",
+                    Title: "Carbon Capture Investment Credits",
+                    Description: "Establishes tax incentives for carbon capture, utilization, and storage projects in Illinois industrial facilities.",
+                    Status: "Active",
+                    Sponsor: "Sen. Ram Villivalam",
+                    IntroducedDate: "2024-02-28",
+                    LastAction: "Amended in committee",
+                    Chamber: "Senate",
+                    Category: "Carbon",
+                    StakeholderNotes: "Industry stakeholders heavily involved - monitor for appropriations impact",
+                    PriorityLevel: "Medium"
+                }
+            ];
+            filteredLegislation = [...allLegislation];
+            displayLegislation();
+            updateStats();
+            
+            // Show message about sample data
+            const grid = document.getElementById('legislationGrid');
+            const sampleMessage = document.createElement('div');
+            sampleMessage.className = 'csv-info';
+            sampleMessage.innerHTML = '<h3>📋 Sample Data Loaded</h3><p>CSV file not found. Displaying sample data. To use real data, create a "legislation-data.csv" file in the same directory as this HTML file.</p>';
+            grid.insertBefore(sampleMessage, grid.firstChild);
+        }
+
+        function displayLegislation() {
+            const grid = document.getElementById('legislationGrid');
+            
+            if (filteredLegislation.length === 0) {
+                grid.innerHTML = '<div class="no-results">No legislation found matching your criteria.</div>';
+                return;
+            }
+            
+            grid.innerHTML = filteredLegislation.map(bill => {
+                const deadlineClass = getDeadlineClass(bill.DeadlineDate);
+                const cardClass = `bill-card ${bill.RequiresAction === 'true' ? 'action-required' : ''} ${deadlineClass}`;
+                
+                return `
+                <div class="${cardClass}">
+                    <div class="bill-header">
+                        <div class="bill-number">${bill.BillNumber || 'N/A'}</div>
+                        <div class="status-badge status-${(bill.Status || 'pending').toLowerCase()}">${bill.Status || 'Pending'}</div>
+                    </div>
+                    <div class="bill-title">${bill.Title || 'Untitled'}</div>
+                    <div class="bill-description">${bill.Description || 'No description available'}</div>
+                    <div class="bill-meta">
+                        <div class="sponsor">Sponsor: ${bill.Sponsor || 'Unknown'}</div>
+                        <div>
+                            <span>${bill.Chamber || 'Unknown'}</span> • 
+                            <span>${bill.Category || 'General'}</span> • 
+                            <span>${formatDate(bill.IntroducedDate)}</span>
+                            ${bill.PriorityLevel ? ` • <strong>${bill.PriorityLevel} Priority</strong>` : ''}
+                        </div>
+                    </div>
+                    ${bill.LastAction ? `<div style="margin-top: 10px; font-size: 0.9em; color: #6c757d;">Last Action: ${bill.LastAction}</div>` : ''}
+                    ${bill.StakeholderNotes ? `<div style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px; font-size: 0.9em;"><strong>Stakeholder Notes:</strong> ${bill.StakeholderNotes}</div>` : ''}
+                    ${getAnalysisSection(bill)}
+                    ${getSMESection(bill)}
+                    ${getDeadlineAlert(bill.DeadlineDate)}
+                </div>
+            `;
+            }).join('');
+        }
+
+        function updateStats() {
+            const totalBills = allLegislation.length;
+            const activeBills = allLegislation.filter(bill => bill.Status === 'Active').length;
+            const passedBills = allLegislation.filter(bill => bill.Status === 'Passed').length;
+            
+            // Calculate recent bills (last 30 days)
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            const recentBills = allLegislation.filter(bill => {
+                if (!bill.IntroducedDate) return false;
+                const billDate = new Date(bill.IntroducedDate);
+                return billDate >= thirtyDaysAgo;
+            }).length;
+
+            document.getElementById('totalBills').textContent = totalBills;
+            document.getElementById('activeBills').textContent = activeBills;
+            document.getElementById('passedBills').textContent = passedBills;
+            document.getElementById('recentBills').textContent = recentBills;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'No date';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        function getAnalysisSection(bill) {
+            if (!bill.ImpactAssessment && !bill.FiscalNote && !bill.AnalysisComplete) return '';
+            
+            let html = '<div style="margin-top: 15px; padding: 12px; background: #f1f3f4; border-radius: 8px; font-size: 0.9em;">';
+            html += '<strong>📋 Analysis Status:</strong><br>';
+            
+            if (bill.ImpactAssessment) {
+                html += `<div style="margin-top: 5px;">Impact: ${bill.ImpactAssessment}</div>`;
+            }
+            if (bill.FiscalNote) {
+                html += `<div style="margin-top: 5px;">Fiscal Impact: ${bill.FiscalNote}</div>`;
+            }
+            
+            const analysisClass = bill.AnalysisComplete === 'Complete' ? 'analysis-complete' : 
+                                 bill.AnalysisComplete === 'In Progress' ? 'analysis-progress' : 'analysis-pending';
+            
+            if (bill.AnalysisComplete) {
+                html += `<span class="analysis-status ${analysisClass}">${bill.AnalysisComplete}</span>`;
+            }
+            
+            html += '</div>';
+            return html;
+        }
+
+        function getSMESection(bill) {
+            if (!bill.SMEContact && !bill.CoalitionPartners) return '';
+            
+            let html = '<div style="margin-top: 10px; padding: 10px; background: #e8f5e8; border-radius: 8px; font-size: 0.9em;">';
+            html += '<strong>🤝 Coordination:</strong><br>';
+            
+            if (bill.SMEContact) {
+                html += `<div style="margin-top: 5px;"><strong>SME Contact:</strong> ${bill.SMEContact}</div>`;
+            }
+            if (bill.CoalitionPartners) {
+                html += `<div style="margin-top: 5px;"><strong>Coalition Partners:</strong> ${bill.CoalitionPartners}</div>`;
+            }
+            
+            html += '</div>';
+            return html;
+        }
+
+        function getDeadlineClass(deadlineDate) {
+            if (!deadlineDate) return '';
+            
+            const today = new Date();
+            const deadline = new Date(deadlineDate);
+            const daysUntil = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+            
+            if (daysUntil <= 7 && daysUntil >= 0) {
+                return 'upcoming-deadline';
+            }
+            return '';
+        }
+
+        function getDeadlineAlert(deadlineDate) {
+            if (!deadlineDate) return '';
+            
+            const today = new Date();
+            const deadline = new Date(deadlineDate);
+            const daysUntil = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+            
+            if (daysUntil < 0) {
+                return `<div class="deadline-alert urgent-deadline">⚠️ Deadline passed: ${formatDate(deadlineDate)}</div>`;
+            } else if (daysUntil <= 3) {
+                return `<div class="deadline-alert urgent-deadline">🚨 URGENT: Deadline in ${daysUntil} day(s) - ${formatDate(deadlineDate)}</div>`;
+            } else if (daysUntil <= 7) {
+                return `<div class="deadline-alert">⏰ Deadline approaching: ${formatDate(deadlineDate)} (${daysUntil} days)</div>`;
+            } else if (daysUntil <= 14) {
+                return `<div class="deadline-alert">📅 Upcoming deadline: ${formatDate(deadlineDate)} (${daysUntil} days)</div>`;
+            }
+            return '';
+        }
+
+        function filterLegislation() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const chamberFilter = document.getElementById('chamberFilter').value;
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const priorityFilter = document.getElementById('priorityFilter').value;
+
+            filteredLegislation = allLegislation.filter(bill => {
+                const matchesSearch = !searchTerm || 
+                    (bill.BillNumber && bill.BillNumber.toLowerCase().includes(searchTerm)) ||
+                    (bill.Title && bill.Title.toLowerCase().includes(searchTerm)) ||
+                    (bill.Sponsor && bill.Sponsor.toLowerCase().includes(searchTerm)) ||
+                    (bill.Description && bill.Description.toLowerCase().includes(searchTerm)) ||
+                    (bill.StakeholderNotes && bill.StakeholderNotes.toLowerCase().includes(searchTerm));
+                
+                const matchesStatus = !statusFilter || bill.Status === statusFilter;
+                const matchesChamber = !chamberFilter || bill.Chamber === chamberFilter;
+                const matchesCategory = !categoryFilter || bill.Category === categoryFilter;
+                const matchesPriority = !priorityFilter || bill.PriorityLevel === priorityFilter;
+
+                return matchesSearch && matchesStatus && matchesChamber && matchesCategory && matchesPriority;
+            });
+
+            displayLegislation();
+        }
+
+        function showError(message) {
+            const grid = document.getElementById('legislationGrid');
+            grid.innerHTML = `<div class="error">${message}</div>`;
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', filterLegislation);
+        document.getElementById('statusFilter').addEventListener('change', filterLegislation);
+        document.getElementById('chamberFilter').addEventListener('change', filterLegislation);
+        document.getElementById('categoryFilter').addEventListener('change', filterLegislation);
+        document.getElementById('priorityFilter').addEventListener('change', filterLegislation);
+        document.getElementById('analysisFilter').addEventListener('change', filterLegislation);
+        document.getElementById('actionFilter').addEventListener('change', filterLegislation);
+
+        // Load data when page loads
+        loadLegislationData();
+    </script>
+</body>
+</html>
