@@ -14,7 +14,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #000f9f 0%, #001eb8 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -30,7 +30,7 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            background: linear-gradient(135deg, #000f9f 0%, #001eb8 100%);
             color: white;
             padding: 40px;
             text-align: center;
@@ -91,8 +91,8 @@
 
         .search-box input:focus {
             outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            border-color: #000f9f;
+            box-shadow: 0 0 0 3px rgba(0, 15, 159, 0.1);
         }
 
         .search-icon {
@@ -121,7 +121,7 @@
 
         .filter-select:focus {
             outline: none;
-            border-color: #3498db;
+            border-color: #000f9f;
         }
 
         .stats {
@@ -137,7 +137,7 @@
             flex: 1;
             min-width: 150px;
             padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #000f9f 0%, #001eb8 100%);
             color: white;
             border-radius: 15px;
             text-align: center;
@@ -166,7 +166,7 @@
             border-radius: 15px;
             padding: 25px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            border-left: 5px solid #3498db;
+            border-left: 5px solid #000f9f;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
@@ -179,7 +179,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, transparent 0%, rgba(52, 152, 219, 0.02) 100%);
+            background: linear-gradient(135deg, transparent 0%, rgba(0, 15, 159, 0.02) 100%);
             pointer-events: none;
         }
 
@@ -200,7 +200,7 @@
         .bill-number {
             font-size: 1.3rem;
             font-weight: bold;
-            color: #2c3e50;
+            color: #000f9f;
         }
 
         .status-badge {
@@ -212,19 +212,19 @@
             letter-spacing: 0.5px;
         }
 
-        .status-active { background: #d4edda; color: #155724; }
-        .status-passed { background: #cce5ff; color: #004085; }
-        .status-failed { background: #f8d7da; color: #721c24; }
-        .status-pending { background: #fff3cd; color: #856404; }
+        .status-active { background: #dcfce7; color: #166534; }
+        .status-passed { background: #e0e7ff; color: #000f9f; }
+        .status-failed { background: #fef2f2; color: #991b1b; }
+        .status-pending { background: #fef3c7; color: #92400e; }
 
         .action-required {
-            border-left: 5px solid #dc3545 !important;
-            background: linear-gradient(135deg, rgba(220, 53, 69, 0.02) 0%, rgba(220, 53, 69, 0.05) 100%);
+            border-left: 5px solid #dc2626 !important;
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.02) 0%, rgba(220, 38, 38, 0.05) 100%);
         }
 
         .upcoming-deadline {
-            border-left: 5px solid #fd7e14 !important;
-            background: linear-gradient(135deg, rgba(253, 126, 20, 0.02) 0%, rgba(253, 126, 20, 0.05) 100%);
+            border-left: 5px solid #f59e0b !important;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.02) 0%, rgba(245, 158, 11, 0.05) 100%);
         }
 
         .analysis-status {
@@ -236,31 +236,31 @@
             margin-top: 8px;
         }
 
-        .analysis-complete { background: #d1ecf1; color: #0c5460; }
-        .analysis-pending { background: #f8d7da; color: #721c24; }
-        .analysis-progress { background: #fff3cd; color: #856404; }
+        .analysis-complete { background: #e0e7ff; color: #000f9f; }
+        .analysis-pending { background: #fef2f2; color: #991b1b; }
+        .analysis-progress { background: #fef3c7; color: #92400e; }
 
         .deadline-alert {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
             border-radius: 8px;
             padding: 8px 12px;
             margin-top: 10px;
             font-size: 0.9em;
-            color: #856404;
+            color: #92400e;
             font-weight: 500;
         }
 
         .urgent-deadline {
-            background: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
+            background: #fef2f2;
+            border-color: #dc2626;
+            color: #991b1b;
         }
 
         .bill-title {
             font-size: 1.1rem;
             font-weight: 600;
-            color: #2c3e50;
+            color: #000f9f;
             margin-bottom: 10px;
             line-height: 1.4;
         }
@@ -308,15 +308,15 @@
         }
 
         .csv-info {
-            background: #e3f2fd;
-            border: 1px solid #bbdefb;
+            background: #e0e7ff;
+            border: 1px solid #c7d2fe;
             border-radius: 10px;
             padding: 20px;
             margin: 20px 40px;
         }
 
         .csv-info h3 {
-            color: #1976d2;
+            color: #000f9f;
             margin-bottom: 10px;
         }
 
